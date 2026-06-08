@@ -1,0 +1,10 @@
+flask
+gunicorn
+deepface==0.0.79
+python-multipart==0.0.6
+numpy
+pandas
+tensorflow
+pillow>=10.0,<11
+opencv-python-headless==4.8.1.78
+scikit-learn
