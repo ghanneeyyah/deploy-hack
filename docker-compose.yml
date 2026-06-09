@@ -1,0 +1,32 @@
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend-node
+      - ai-service
+    networks:
+      - app-network
+
+  backend-node:
+    build: ./backend-node
+    env_file: .env
+    ports:
+      - "5000:5000"
+    depends_on:
+      - ai-service
+    networks:
+      - app-network
+
+  ai-service:
+    build: ./ai-service
+    env_file: .env
+    ports:
+      - "8000:8000"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
