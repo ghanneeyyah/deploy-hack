@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 python-dotenv
+spacy
 deepface==0.0.79
 python-multipart==0.0.6
 numpy
