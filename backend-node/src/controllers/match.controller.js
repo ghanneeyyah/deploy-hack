@@ -1,6 +1,7 @@
 const Match = require('../models/Match.model');
 const MissingPerson = require('../models/MissingPerson.model');
 const Sighting = require('../models/Sighting.model');
+const notificationService = require('../services/notification.service');
 
 /**
  * Get all matches with filters
@@ -310,11 +311,29 @@ const verifyMatch = async (req, res) => {
             missingPersonId: match.missingPersonId,
             verifiedBy: req.user.name
         });
+
+        // Notify the family/contact now that a human has verified the match.
+        // Failures here are logged but never fail the request — the match
+        // itself is already verified and shouldn't be rolled back over a
+        // notification hiccup.
+        let notificationResult = null;
+        try {
+            const missingPerson = await MissingPerson.findById(match.missingPersonId);
+            if (missingPerson) {
+                notificationResult = await notificationService.notifyFamilyOfMatch(missingPerson, match);
+                match.notificationSent = notificationResult.emailSent || notificationResult.smsSent;
+                match.notificationSentAt = new Date();
+                await match.save();
+            }
+        } catch (notifyError) {
+            console.error('Error notifying family of verified match:', notifyError.message);
+        }
         
         res.json({
             success: true,
             data: match,
-            message: 'Match verified successfully'
+            message: 'Match verified successfully',
+            notification: notificationResult
         });
     } catch (error) {
         console.error('Error verifying match:', error);
