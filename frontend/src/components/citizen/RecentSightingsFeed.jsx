@@ -1,7 +1,7 @@
 // src/components/citizen/RecentSightingsFeed.jsx
 import { Link } from 'react-router-dom';
 import { MapPin, Clock, Eye } from 'lucide-react';
-import { timeAgo, truncate, getStatusColor, formatLocation } from '../../utils/helpers';
+import { timeAgo, truncate, getStatusColor, formatLocation, getImageUrl } from '../../utils/helpers';
 
 export default function RecentSightingsFeed({ sightings }) {
   if (!sightings || sightings.length === 0) {
@@ -25,7 +25,7 @@ export default function RecentSightingsFeed({ sightings }) {
           <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
             {sighting.image?.url ? (
               <img
-                src={sighting.image.url}
+                src={getImageUrl(sighting.image)}
                 alt="Sighting"
                 className="w-full h-full object-cover"
               />

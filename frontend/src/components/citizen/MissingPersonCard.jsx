@@ -1,11 +1,11 @@
 // src/components/citizen/MissingPersonCard.jsx
 import { Link } from 'react-router-dom';
 import { MapPin, Clock } from 'lucide-react';
-import { formatDate, timeAgo, getStatusColor } from '../../utils/helpers';
+import { formatDate, timeAgo, getStatusColor, getImageUrl } from '../../utils/helpers';
 
 export default function MissingPersonCard({ person }) {
   const fullName = person.name || 'Unknown';
-  const photoUrl = person.photos?.[0] || person.photo || null;
+  const photoUrl = getImageUrl(person.photos?.[0] || person.photo);
 
   return (
     <Link

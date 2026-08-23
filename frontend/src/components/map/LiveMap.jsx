@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useContext, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, CircleMarker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { SocketContext } from '../../context/SocketContext';
-import { formatDate, timeAgo } from '../../utils/helpers';
+import { formatDate, timeAgo, getImageUrl } from '../../utils/helpers';
 import 'leaflet/dist/leaflet.css';
 
 // Fix default marker icon broken by webpack
@@ -126,7 +126,11 @@ export default function LiveMap({ markers = [], sightings = [], mapType = 'marke
     return unsub;
   }, [subscribe]);
 
+  // /api/map/all returns flat { lat, lng } on each sighting. Other sources
+  // (e.g. a raw Sighting document from a socket event) may nest it under
+  // `location` instead — handle both.
   const getSightingCoords = (sighting) => {
+    if (sighting.lat != null && sighting.lng != null) return [sighting.lat, sighting.lng];
     const loc = sighting.location;
     if (!loc) return null;
     const lat = loc.coordinates?.[1] ?? loc.lat ?? loc.latitude;
@@ -135,9 +139,13 @@ export default function LiveMap({ markers = [], sightings = [], mapType = 'marke
     return [lat, lng];
   };
 
+  // Same story: /api/map/all returns flat { lat, lng }. A raw MissingPerson
+  // document nests it under `lastSeenCoordinates` (with a GeoJSON fallback).
   const getMissingCoords = (person) => {
-    const loc = person.lastKnownCoordinates || person.coordinates;
-    if (loc?.lat && loc?.lng) return [loc.lat, loc.lng];
+    if (person.lat != null && person.lng != null) return [person.lat, person.lng];
+    const loc = person.lastSeenCoordinates || person.lastKnownCoordinates || person.coordinates;
+    if (loc?.lat != null && loc?.lng != null) return [loc.lat, loc.lng];
+    if (loc?.geoJSON?.coordinates) return [loc.geoJSON.coordinates[1], loc.geoJSON.coordinates[0]];
     if (loc?.coordinates) return [loc.coordinates[1], loc.coordinates[0]];
     return null;
   };
@@ -160,14 +168,15 @@ export default function LiveMap({ markers = [], sightings = [], mapType = 'marke
       {markers.map((person) => {
         const coords = getMissingCoords(person);
         if (!coords) return null;
-        const name = person.name || 'Unknown';
+        const name = person.name || person.fullName || 'Unknown';
+        const photo = person.photoUrl || person.photos?.[0];
         return (
-          <Marker key={person._id || person.id} position={coords} icon={missingIcon}>
+          <Marker key={person.id || person._id} position={coords} icon={missingIcon}>
             <Popup>
               <div className="min-w-[180px]">
-                {person.photos?.[0] && (
+                {photo && (
                   <img
-                    src={person.photos[0]}
+                    src={getImageUrl(photo)}
                     alt={name}
                     className="w-full h-24 object-cover rounded mb-2"
                   />
@@ -175,7 +184,7 @@ export default function LiveMap({ markers = [], sightings = [], mapType = 'marke
                 <p className="font-semibold text-gray-900">{name}</p>
                 <p className="text-xs text-gray-500">{person.age} yrs • {person.gender}</p>
                 <p className="text-xs text-gray-500 mt-1">
-                  Last seen: {person.lastKnownLocation || 'Unknown'}
+                  Last seen: {person.address || person.lastKnownLocation || person.lastSeenLocation || 'Unknown'}
                 </p>
                 <span className="inline-block mt-2 text-xs px-2 py-0.5 bg-red-100 text-red-700 rounded-full font-medium">
                   Missing
@@ -190,18 +199,19 @@ export default function LiveMap({ markers = [], sightings = [], mapType = 'marke
       {liveSightings.map((sighting) => {
         const coords = getSightingCoords(sighting);
         if (!coords) return null;
-        const isNew = newSightingIds.has(sighting._id);
+        const isNew = newSightingIds.has(sighting._id || sighting.id);
+        const image = sighting.imageUrl || sighting.image?.url || sighting.photo;
         return (
           <Marker
-            key={sighting._id}
+            key={sighting._id || sighting.id}
             position={coords}
             icon={isNew ? newSightingIcon : sightingIcon}
           >
             <Popup>
               <div className="min-w-[180px]">
-                {(sighting.image?.url || sighting.photo) && (
+                {image && (
                   <img
-                    src={sighting.image?.url || sighting.photo}
+                    src={getImageUrl(image)}
                     alt="Sighting"
                     className="w-full h-24 object-cover rounded mb-2"
                   />
@@ -211,10 +221,10 @@ export default function LiveMap({ markers = [], sightings = [], mapType = 'marke
                   Sighting Report
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  {sighting.location?.address || 'Location recorded'}
+                  {sighting.address || sighting.location?.address || 'Location recorded'}
                 </p>
                 <p className="text-xs text-gray-400 mt-1">
-                  {timeAgo(sighting.sightingTime || sighting.createdAt)}
+                  {timeAgo(sighting.time || sighting.sightingTime || sighting.createdAt)}
                 </p>
                 {sighting.description && (
                   <p className="text-xs text-gray-600 mt-2 line-clamp-2">
@@ -245,7 +255,7 @@ export default function LiveMap({ markers = [], sightings = [], mapType = 'marke
           if (!coords) return null;
           return (
             <CircleMarker
-              key={`heat-${sighting._id}`}
+              key={`heat-${sighting._id || sighting.id}`}
               center={coords}
               radius={20}
               pathOptions={{

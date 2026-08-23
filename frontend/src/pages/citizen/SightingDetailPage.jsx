@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPin, Calendar, Clock, Eye } from 'lucide-react';
 import sightingService from '../../services/sighting.service';
-import { formatDateTime, timeAgo, getStatusColor, formatLocation } from '../../utils/helpers';
+import { formatDateTime, timeAgo, getStatusColor, formatLocation, getImageUrl } from '../../utils/helpers';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 
@@ -71,7 +71,7 @@ export default function SightingDetailPage() {
           <div className="aspect-square bg-gray-100 rounded-xl overflow-hidden">
             {sighting.photo ? (
               <img
-                src={sighting.photo}
+                src={getImageUrl(sighting.photo || sighting.image)}
                 alt="Sighting"
                 className="w-full h-full object-cover"
               />
