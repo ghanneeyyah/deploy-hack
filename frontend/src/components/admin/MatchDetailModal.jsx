@@ -1,7 +1,7 @@
 // src/components/admin/MatchDetailModal.jsx
 import { X, User, MapPin, Calendar, CheckCircle, XCircle, Search } from 'lucide-react';
 import { formatMatchPercentage, formatConfidenceLevel } from '../../utils/formatters';
-import { formatDateTime } from '../../utils/helpers';
+import { formatDateTime, getImageUrl } from '../../utils/helpers';
 
 export default function MatchDetailModal({ match, onClose, onVerify, onReject }) {
   if (!match) return null;
@@ -84,7 +84,7 @@ export default function MatchDetailModal({ match, onClose, onVerify, onReject })
               <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
                 {match.missingPerson?.photos?.[0] ? (
                   <img
-                    src={match.missingPerson.photos[0]}
+                    src={getImageUrl(match.missingPerson.photos[0])}
                     alt="Missing person"
                     className="w-full h-full object-cover"
                   />
@@ -100,7 +100,7 @@ export default function MatchDetailModal({ match, onClose, onVerify, onReject })
               <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
                 {match.sighting?.photo ? (
                   <img
-                    src={match.sighting.photo}
+                    src={getImageUrl(match.sighting.photo || match.sighting.image)}
                     alt="Sighting"
                     className="w-full h-full object-cover"
                   />

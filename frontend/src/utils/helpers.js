@@ -122,3 +122,18 @@ export function getMarkerIcon(type, status) {
   if (type === 'sighting') return '/images/markers/sighting-pending.png';
   return '/images/markers/missing-marker.png';
 }
+
+// The API stores uploaded photos as relative paths (e.g. "/uploads/faces/x.jpg")
+// served by the Node backend's own origin. Since the frontend and backend are
+// deployed as separate services with different origins, a raw relative path
+// resolves against the frontend's origin and silently 404s. This prefixes it
+// with the backend's actual origin.
+// Accepts a raw url string, a photo/image object ({ url }), or null/undefined.
+export function getImageUrl(photoOrUrl) {
+  if (!photoOrUrl) return null;
+  const path = typeof photoOrUrl === 'string' ? photoOrUrl : photoOrUrl.url;
+  if (!path) return null;
+  if (/^https?:\/\//i.test(path)) return path; // already absolute
+  const base = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '');
+  return `${base}${path.startsWith('/') ? path : '/' + path}`;
+}

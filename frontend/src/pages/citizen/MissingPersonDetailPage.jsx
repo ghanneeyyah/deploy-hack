@@ -4,7 +4,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Calendar, User, AlertCircle, Edit } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import missingPersonService from '../../services/missingPerson.service';
-import { formatDate, getFullName, getStatusColor } from '../../utils/helpers';
+import { formatDate, getFullName, getStatusColor, getImageUrl } from '../../utils/helpers';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 
@@ -89,7 +89,7 @@ export default function MissingPersonDetailPage() {
           <div className="aspect-square bg-gray-100 rounded-xl overflow-hidden">
             {selectedPhoto ? (
               <img
-                src={selectedPhoto}
+                src={getImageUrl(selectedPhoto)}
                 alt={fullName}
                 className="w-full h-full object-cover"
               />
@@ -110,7 +110,7 @@ export default function MissingPersonDetailPage() {
                     selectedPhoto === photo ? 'border-maroon-800' : 'border-transparent'
                   }`}
                 >
-                  <img src={photo} alt={`${fullName} ${index + 1}`} className="w-full h-full object-cover" />
+                  <img src={getImageUrl(photo)} alt={`${fullName} ${index + 1}`} className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Eye, CheckCircle, XCircle, Trash2, MapPin } from 'lucide-react';
 import sightingService from '../../services/sighting.service';
-import { formatDate, timeAgo, truncate, getStatusColor } from '../../utils/helpers';
+import { formatDate, timeAgo, truncate, getStatusColor, getImageUrl } from '../../utils/helpers';
 import { getErrorMessage } from '../../utils/errorHandler';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
@@ -138,7 +138,7 @@ export default function SightingReviewPage() {
                 <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                   {sighting.image?.url || sighting.photo ? (
                     <img
-                      src={sighting.image?.url || sighting.photo}
+                      src={getImageUrl(sighting.image || sighting.photo)}
                       alt=""
                       className="w-full h-full object-cover"
                     />

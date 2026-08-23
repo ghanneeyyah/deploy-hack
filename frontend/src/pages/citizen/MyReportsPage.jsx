@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { FileText, Eye, Plus } from 'lucide-react';
 import missingPersonService from '../../services/missingPerson.service';
 import sightingService from '../../services/sighting.service';
-import { formatDate, getStatusColor, truncate } from '../../utils/helpers';
+import { formatDate, getStatusColor, truncate, getImageUrl } from '../../utils/helpers';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
 
@@ -108,7 +108,7 @@ export default function MyReportsPage() {
                   >
                     <div className="w-14 h-14 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                       {person.photos?.[0] ? (
-                        <img src={person.photos[0]} alt="" className="w-full h-full object-cover" />
+                        <img src={getImageUrl(person.photos[0])} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400">
                           <FileText className="w-6 h-6" />
@@ -155,7 +155,7 @@ export default function MyReportsPage() {
                   >
                     <div className="w-14 h-14 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                       {sighting.photo ? (
-                        <img src={sighting.photo} alt="" className="w-full h-full object-cover" />
+                        <img src={getImageUrl(sighting.photo || sighting.image)} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400">
                           <Eye className="w-6 h-6" />

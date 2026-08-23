@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Users, MapPin, Clock, CheckCircle, XCircle, Eye, Trash2 } from 'lucide-react';
 import missingPersonService from '../../services/missingPerson.service';
-import { formatDate, timeAgo, truncate, getStatusColor } from '../../utils/helpers';
+import { formatDate, timeAgo, truncate, getStatusColor, getImageUrl } from '../../utils/helpers';
 import { getErrorMessage } from '../../utils/errorHandler';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorAlert from '../../components/common/ErrorAlert';
@@ -106,7 +106,7 @@ export default function MissingPersonsAdminPage() {
           <div className="space-y-3">
             {persons.map((person) => {
               const name = person.fullName || person.name || 'Unknown';
-              const photo = person.photos?.[0]?.url || person.photo || null;
+              const photo = getImageUrl(person.photos?.[0] || person.photo);
 
               return (
                 <div
